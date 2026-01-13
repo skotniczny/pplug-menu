@@ -814,7 +814,7 @@ void menu_init (MenuPlugin *m)
     m->menu = NULL;
 
     gboolean need_prefix = (g_getenv ("XDG_MENU_PREFIX") == NULL);
-    m->menu_cache = menu_cache_lookup (need_prefix ? "lxde-applications.menu+hidden" : "applications.menu+hidden");
+    m->menu_cache = menu_cache_lookup (need_prefix ? "lxde-applications.menu" : "applications.menu");
     if (m->menu_cache == NULL) g_warning ("Error loading applications menu");
 
     // we don't need a notification, but if you don't call this, the cache never loads...
