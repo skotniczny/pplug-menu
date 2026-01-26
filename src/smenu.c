@@ -77,8 +77,6 @@ conf_table_t conf_table[5] = {
 
 static gboolean longpress;
 
-GQuark sys_menu_item_quark = 0;
-
 /*----------------------------------------------------------------------------*/
 /* Prototypes                                                                 */
 /*----------------------------------------------------------------------------*/
@@ -94,23 +92,23 @@ static void handle_list_select (GtkTreeView *tv, GtkTreePath *path, GtkTreeViewC
 static void search_destroyed (GtkWidget *, gpointer data);
 static void create_search (MenuPlugin *m);
 static void destroy_menu (MenuPlugin *m);
-static void handle_menu_item_activate (GtkMenuItem *mi, gpointer);
-static void handle_menu_item_properties (GtkMenuItem *, GtkWidget* mi);
+static void handle_menu_item_activate (GtkMenuItem *mi, gpointer user_data);
+static void handle_menu_item_properties (GtkWidget *mi, gpointer user_data);
 static void handle_restore_submenu (GtkMenuItem *mi, GtkWidget *submenu);
-static void show_context_menu (GtkWidget* mi);
-static gboolean handle_menu_item_button_press (GtkWidget* mi, GdkEventButton* evt, gpointer);
+static void show_context_menu (MenuPlugin *m, GtkWidget* mi);
+static gboolean handle_menu_item_button_press (GtkWidget* mi, GdkEventButton* evt, gpointer user_data);
 static gboolean handle_key_presses (GtkWidget *, GdkEventKey *event, gpointer user_data);
 static GtkWidget *create_system_menu_item (MenuCacheItem *item, MenuPlugin *m);
 static int sys_menu_load_submenu (MenuPlugin* m, MenuCacheDir* dir, GtkWidget* menu, int pos);
 static void insert_system_menu (MenuPlugin *m, GtkMenu *menu, int position);
 static gboolean create_menu (MenuPlugin *m);
 static void menu_button_clicked (GtkWidget *, MenuPlugin *m);
-static void handle_menu_item_add_to_desktop (GtkMenuItem *, GtkWidget* mi);
+static void handle_menu_item_add_to_desktop (GtkWidget *mi, gpointer user_data);
 #ifdef LXPLUG
 static void handle_search_resize (GtkWidget *, GtkAllocation *, gpointer user_data);
 static void handle_menu_hidden (GtkWidget *, gpointer user_data);
 #else
-static void handle_menu_item_add_to_launcher (GtkMenuItem *, GtkWidget* mi);
+static void handle_menu_item_add_to_launcher (GtkWidget *mi, gpointer);
 static gboolean handle_menu_item_button_release (GtkWidget* mi, GdkEventButton*, MenuPlugin* m);
 static void handle_menu_item_gesture_pressed (GtkGestureLongPress *, gdouble, gdouble, GtkWidget *);
 static void handle_popped_up (GtkMenu *menu, gpointer, gpointer, gboolean, gboolean, MenuPlugin *);
@@ -392,13 +390,13 @@ static void destroy_menu (MenuPlugin *m)
 
 static void handle_menu_item_activate (GtkMenuItem *mi, gpointer)
 {
-    MenuCacheItem *item = g_object_get_qdata (G_OBJECT (mi), sys_menu_item_quark);
-    gtk_launch (menu_cache_item_get_file_basename (item));
+    gtk_launch (gtk_widget_get_name (GTK_WIDGET (mi)));
 }
 
-static void handle_menu_item_add_to_desktop (GtkMenuItem *, GtkWidget* mi)
+static void handle_menu_item_add_to_desktop (GtkWidget *mi, gpointer user_data)
 {
-    MenuCacheItem *item = g_object_get_qdata (G_OBJECT (mi), sys_menu_item_quark);
+    MenuPlugin *m = (MenuPlugin *) user_data;
+    MenuCacheItem *item = menu_cache_find_item_by_id (m->menu_cache, gtk_widget_get_name (mi));
     char *path = g_build_filename (g_get_home_dir (), "Desktop", menu_cache_item_get_file_basename (item), NULL);
     FILE *fp = fopen (path, "wb");
     fprintf (fp, "[Desktop Entry]\nType=Link\n");
@@ -410,16 +408,16 @@ static void handle_menu_item_add_to_desktop (GtkMenuItem *, GtkWidget* mi)
 }
 
 #ifndef LXPLUG
-static void handle_menu_item_add_to_launcher (GtkMenuItem *, GtkWidget* mi)
+static void handle_menu_item_add_to_launcher (GtkWidget *mi, gpointer)
 {
-    MenuCacheItem *item = g_object_get_qdata (G_OBJECT (mi), sys_menu_item_quark);
-    add_to_launcher (menu_cache_item_get_file_basename (item));
+    add_to_launcher (gtk_widget_get_name (mi));
 }
 #endif
 
-static void handle_menu_item_properties (GtkMenuItem *, GtkWidget* mi)
+static void handle_menu_item_properties (GtkWidget *mi, gpointer user_data)
 {
-    MenuCacheItem *item = g_object_get_qdata (G_OBJECT (mi), sys_menu_item_quark);
+    MenuPlugin *m = (MenuPlugin *) user_data;
+    MenuCacheItem *item = menu_cache_find_item_by_id (m->menu_cache, gtk_widget_get_name (mi));
     show_properties_dialog (item);
 }
 
@@ -430,19 +428,21 @@ static void handle_restore_submenu (GtkMenuItem *mi, GtkWidget *submenu)
     g_object_set_data (G_OBJECT (mi), "PanelMenuItemSubmenu", NULL);
 }
 
-static void show_context_menu (GtkWidget* mi)
+static void show_context_menu (MenuPlugin *m, GtkWidget* mi)
 {
     GtkWidget *item, *menu;
 
     menu = gtk_menu_new ();
 
     item = gtk_menu_item_new_with_label (_("Add to desktop"));
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_item_add_to_desktop), mi);
+    gtk_widget_set_name (item, gtk_widget_get_name (mi));
+    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_item_add_to_desktop), m);
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
 #ifndef LXPLUG
     item = gtk_menu_item_new_with_label (_("Add to Launcher"));
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_item_add_to_launcher), mi);
+    gtk_widget_set_name (item, gtk_widget_get_name (mi));
+    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_item_add_to_launcher), m);
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 #endif
 
@@ -450,7 +450,8 @@ static void show_context_menu (GtkWidget* mi)
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
     item = gtk_menu_item_new_with_label (_("Properties"));
-    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_item_properties), mi);
+    gtk_widget_set_name (item, gtk_widget_get_name (mi));
+    g_signal_connect (item, "activate", G_CALLBACK (handle_menu_item_properties), m);
     gtk_menu_shell_append (GTK_MENU_SHELL (menu), item);
 
     item = gtk_menu_item_get_submenu (GTK_MENU_ITEM (mi)); /* reuse it */
@@ -465,14 +466,16 @@ static void show_context_menu (GtkWidget* mi)
     gtk_widget_show_all (menu);
 }
 
-static gboolean handle_menu_item_button_press (GtkWidget* mi, GdkEventButton* evt, gpointer)
+static gboolean handle_menu_item_button_press (GtkWidget* mi, GdkEventButton* evt, gpointer user_data)
 {
+    MenuPlugin *m = (MenuPlugin *) user_data;
+
     longpress = FALSE;
     if (evt->button == 3)
     {
         /* don't make duplicates */
         if (g_signal_handler_find (mi, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, handle_restore_submenu, NULL)) return FALSE;
-        show_context_menu (mi);
+        show_context_menu (m, mi);
     }
     return FALSE;
 }
@@ -529,7 +532,7 @@ static gboolean handle_menu_item_button_release (GtkWidget* mi, GdkEventButton*,
     }
     else
     {
-        show_context_menu (mi);
+        show_context_menu (m, mi);
         gtk_menu_item_select (GTK_MENU_ITEM (mi));
     }
     longpress = FALSE;
@@ -552,7 +555,7 @@ static GtkWidget *create_system_menu_item (MenuCacheItem *item, MenuPlugin *m)
     if (menu_cache_item_get_type (item) == MENU_CACHE_TYPE_SEP)
     {
         mi = gtk_separator_menu_item_new ();
-        g_object_set_qdata (G_OBJECT (mi), sys_menu_item_quark, GINT_TO_POINTER (1));
+        gtk_widget_set_name (mi, NULL);
     }
     else
     {
@@ -565,8 +568,6 @@ static GtkWidget *create_system_menu_item (MenuCacheItem *item, MenuPlugin *m)
 
         label = gtk_label_new (menu_cache_item_get_name (item));
         gtk_container_add (GTK_CONTAINER (box), label);
-
-        g_object_set_qdata_full (G_OBJECT (mi), sys_menu_item_quark, item, NULL);
 
         icon = NULL;
         const char *icon_name = menu_cache_item_get_icon (item);
@@ -599,7 +600,7 @@ static GtkWidget *create_system_menu_item (MenuCacheItem *item, MenuPlugin *m)
         {
             gtk_list_store_insert_with_values (m->applist, NULL, -1, 0, icon, 1, menu_cache_item_get_name (item), 2, menu_cache_item_get_file_basename (item), -1);
 
-            gtk_widget_set_name (mi, "syssubmenu");
+            gtk_widget_set_name (mi, menu_cache_item_get_file_basename (item));
             if (m->tooltips)
             {
                 const char *comment = menu_cache_item_get_comment (item);
@@ -677,26 +678,13 @@ static int sys_menu_load_submenu (MenuPlugin* m, MenuCacheDir* dir, GtkWidget* m
 
 static void insert_system_menu (MenuPlugin *m, GtkMenu *menu, int position)
 {
-    MenuCacheDir *dir;
-
-    if (G_UNLIKELY (sys_menu_item_quark == 0))
-        sys_menu_item_quark = g_quark_from_static_string ("SysMenuItem");
+    MenuCacheDir *dir = NULL;
 
     if (m->applist) gtk_list_store_clear (m->applist);
-    dir = menu_cache_dup_root_dir (m->menu_cache);
+    while (dir == NULL) dir = menu_cache_dup_root_dir (m->menu_cache);
 
-    if (dir)
-    {
-        sys_menu_load_submenu (m, dir, GTK_WIDGET (menu), position);
-        menu_cache_item_unref (MENU_CACHE_ITEM (dir));
-    }
-    else
-    {
-        /* menu content is empty - add a place holder */
-        GtkWidget* mi = gtk_menu_item_new ();
-        g_object_set_qdata (G_OBJECT (mi), sys_menu_item_quark, GINT_TO_POINTER (1));
-        gtk_menu_shell_insert (GTK_MENU_SHELL (menu), mi, position);
-    }
+    sys_menu_load_submenu (m, dir, GTK_WIDGET (menu), position);
+    menu_cache_item_unref (MENU_CACHE_ITEM (dir));
 }
 
 /* Functions to create individual menu items from panel config */
