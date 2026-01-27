@@ -40,6 +40,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ============================================================================*/
 
+#include <fcntl.h>
 #include <locale.h>
 #include <glib/gi18n.h>
 #include <menu-cache.h>
@@ -779,9 +780,20 @@ void menu_set_padding (MenuPlugin *m)
 
 void menu_init (MenuPlugin *m)
 {
+    char *path;
+
     setlocale (LC_ALL, "");
     bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
     bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+
+    /* Create directories for the menu cache to monitor */
+    path = g_build_filename (g_get_home_dir (), ".local", "share", "applications", NULL);
+    g_mkdir_with_parents (path, S_IRUSR | S_IWUSR | S_IXUSR);
+    g_free (path);
+
+    path = g_build_filename (g_get_home_dir (), ".local", "share", "desktop-directories", NULL);
+    g_mkdir_with_parents (path, S_IRUSR | S_IWUSR | S_IXUSR);
+    g_free (path);
 
     /* Allocate icon as a child of top level */
     m->img = gtk_image_new ();
