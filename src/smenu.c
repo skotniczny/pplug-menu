@@ -835,7 +835,7 @@ void menu_destructor (gpointer user_data)
     if (m->menu_cache)
     {
         menu_cache_remove_reload_notify (m->menu_cache, m->reload_notify);
-        menu_cache_unref (m->menu_cache);
+        // unref'ing the menu cache causes a segfault because its io thread isn't being closed...
     }
 
 #ifndef LXPLUG
