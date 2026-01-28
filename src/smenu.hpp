@@ -34,7 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 extern "C" {
 #include <menu-cache.h>
-#include <libfm/fm-gtk.h>
 #include "lxutils.h"
 #include "smenu.h"
 }
