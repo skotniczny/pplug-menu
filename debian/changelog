@@ -1,3 +1,9 @@
+pplug-menu (1.12) trixie; urgency=medium
+
+  * Use generic pixbuf loader; rebuild against latest APIs
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 20 Feb 2026 10:00:25 +0000
+
 pplug-menu (1.11) trixie; urgency=medium
 
   * Move shutdown and run to separate packages
