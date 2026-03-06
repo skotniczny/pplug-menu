@@ -734,6 +734,12 @@ void menu_update_display (MenuPlugin *m)
 /* Handler for control message */
 gboolean menu_control_msg (MenuPlugin *m, const char *cmd)
 {
+    if (!strncmp (cmd, "key_", 4))
+    {
+        if (m->srch) append_to_entry (m->srch, cmd[4] == 8 ? 0 : cmd[4]);
+        return TRUE;
+    }
+
     if (!strncmp (cmd, "menu", 4))
     {
         if (m->menu && gtk_widget_is_visible (m->menu)) destroy_menu (m);
