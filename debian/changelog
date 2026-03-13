@@ -1,3 +1,9 @@
+pplug-menu (1.13) trixie; urgency=medium
+
+  * Fix for missing keystrokes; launch from search on single click
+
+ -- Simon Long <simon@raspberrypi.com>  Fri, 13 Mar 2026 13:51:14 +0000
+
 pplug-menu (1.12) trixie; urgency=medium
 
   * Use generic pixbuf loader; rebuild against latest APIs
