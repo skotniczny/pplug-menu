@@ -293,6 +293,31 @@ static void handle_list_select (GtkTreeView *tv, GtkTreePath *path, GtkTreeViewC
     destroy_search (m);
 }
 
+static gboolean handle_list_button (GtkWidget *, GdkEventButton *event, gpointer user_data)
+{
+    MenuPlugin *m = (MenuPlugin *) user_data;
+    GtkTreeIter fitem;
+    GtkTreeModel *ivm;
+    GtkTreePath *path;
+    char *str;
+
+    if (event->button == 1)
+    {
+        if (gtk_tree_view_get_path_at_pos (GTK_TREE_VIEW (m->stv), event->x, event->y, &path, NULL, NULL, NULL))
+        {
+            ivm = gtk_tree_view_get_model (GTK_TREE_VIEW (m->stv));
+            gtk_tree_model_get_iter (ivm, &fitem, path);
+            gtk_tree_model_get (ivm, &fitem, 2, &str, -1);
+            gtk_tree_path_free (path);
+
+            gtk_launch (str);
+            destroy_search (m);
+        }
+        return TRUE;
+    }
+    return FALSE;
+}
+
 #ifdef LXPLUG
 static void handle_search_resize (GtkWidget *, GtkAllocation *, gpointer user_data)
 {
@@ -351,6 +376,7 @@ static void create_search (MenuPlugin *m)
     m->stv = gtk_tree_view_new_with_model (GTK_TREE_MODEL (flist));
     g_signal_connect (m->stv, "key-press-event", G_CALLBACK (handle_list_keypress), m);
     g_signal_connect (m->stv, "row-activated", G_CALLBACK (handle_list_select), m);
+    g_signal_connect (m->stv, "button-release-event", G_CALLBACK (handle_list_button), m);
     gtk_container_add (GTK_CONTAINER (m->scr), m->stv);
     g_object_unref (slist);
     g_object_unref (flist);
