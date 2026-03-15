@@ -214,13 +214,11 @@ static gboolean handle_list_keypress (GtkWidget *, GdkEventKey *event, gpointer 
 {
     MenuPlugin *m = (MenuPlugin *) user_data;
 
-#ifdef LXPLUG
     if (event->keyval == GDK_KEY_Escape)
     {
         destroy_search (m);
         return TRUE;
     }
-#endif
 
     if ((event->keyval >= 'a' && event->keyval <= 'z') ||
         (event->keyval >= 'A' && event->keyval <= 'Z'))
@@ -260,10 +258,8 @@ static gboolean handle_search_keypress (GtkWidget *, GdkEventKey *event, gpointe
                                 destroy_search (m);
                                 return TRUE;
 
-#ifdef LXPLUG
         case GDK_KEY_Escape :   destroy_search (m);
                                 return TRUE;
-#endif
 
         case GDK_KEY_Up :
         case GDK_KEY_Down :     nrows = event->keyval == GDK_KEY_Down ? 1 : gtk_tree_model_iter_n_children (gtk_tree_view_get_model (GTK_TREE_VIEW (m->stv)), NULL) - 1;
