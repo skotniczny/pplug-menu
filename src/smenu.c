@@ -739,8 +739,13 @@ static gboolean create_menu (MenuPlugin *m)
 static void menu_button_clicked (GtkWidget *, MenuPlugin *m)
 {
     CHECK_LONGPRESS
-    create_menu (m);
-    wrap_show_menu (m->plugin, m->menu);
+    if (m->menu && gtk_widget_is_visible (m->menu)) destroy_menu (m);
+    else if (m->swin && gtk_widget_is_visible (m->swin)) destroy_search (m);
+    else
+    {
+        create_menu (m);
+        wrap_show_menu (m->plugin, m->menu);
+    }
 }
 
 /* Handler for system config changed message from panel */
