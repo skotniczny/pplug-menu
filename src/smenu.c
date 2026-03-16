@@ -763,7 +763,11 @@ gboolean menu_control_msg (MenuPlugin *m, const char *cmd)
 {
     if (!strncmp (cmd, "key_", 4))
     {
-        if (m->srch) append_to_entry (m->srch, cmd[4] == 8 ? 0 : cmd[4]);
+        if (m->srch)
+        {
+            if (cmd[4] == 27) destroy_search (m);
+            else append_to_entry (m->srch, cmd[4] == 8 ? 0 : cmd[4]);
+        }
         return TRUE;
     }
 
