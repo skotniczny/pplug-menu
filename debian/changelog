@@ -1,3 +1,9 @@
+pplug-menu (1.14) trixie; urgency=medium
+
+  * Close search box on escape key
+
+ -- Simon Long <simon@raspberrypi.com>  Mon, 16 Mar 2026 08:03:56 +0000
+
 pplug-menu (1.13) trixie; urgency=medium
 
   * Fix for missing keystrokes; launch from search on single click
