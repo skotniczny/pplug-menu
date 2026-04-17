@@ -10,10 +10,10 @@ msgstr ""
 "Project-Id-Version: lxpanel 0.5.6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-04-17 07:45+0200\n"
-"PO-Revision-Date: 2017-05-25 06:59+0000\n"
-"Last-Translator: Piotr Strębski <strebski@o2.pl>\n"
+"PO-Revision-Date: 2026-04-17 08:57+0200\n"
+"Last-Translator: Skotniczny <skotniczny@outlook.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -30,31 +30,31 @@ msgstr "Uruchom"
 
 #: ../src/gtk-run.c:383
 msgid "_Cancel"
-msgstr ""
+msgstr "_Anuluj"
 
 #: ../src/gtk-run.c:384
 msgid "_OK"
-msgstr ""
+msgstr "_OK"
 
 #: ../src/gtk-run.c:392
 msgid "Enter the command you want to execute:"
-msgstr ""
+msgstr "Podaj polecenie do wykonania:"
 
 #: ../src/smenu.c:71
 msgid "Icon horizontal padding"
-msgstr ""
+msgstr "Odstęp poziomy wokół ikony"
 
 #: ../src/smenu.c:72
 msgid "Fix height of search window"
-msgstr ""
+msgstr "Ustaw stałą wysokość okna wyszukiwania"
 
 #: ../src/smenu.c:73
 msgid "Search window height"
-msgstr ""
+msgstr "Wysokość okna wyszukiwania"
 
 #: ../src/smenu.c:140
 msgid "No file manager is configured."
-msgstr ""
+msgstr "Nie skonfigurowano menedżera plików."
 
 #: ../src/smenu.c:470
 msgid "Add to desktop"
@@ -62,7 +62,7 @@ msgstr "Dodaj do pulpitu"
 
 #: ../src/smenu.c:475
 msgid "Add to Launcher"
-msgstr ""
+msgstr "Dodaj do paska zadań"
 
 #: ../src/smenu.c:483
 msgid "Properties"
@@ -74,12 +74,11 @@ msgstr "Wyloguj"
 
 #: ../src/smenu.c:985
 msgid "Click here to open applications menu"
-msgstr ""
+msgstr "Kliknij tutaj, aby otworzyć menu aplikacji"
 
 #: ../src/smenu.c:1112
-#, fuzzy
 msgid "Searchable Application Menu"
-msgstr "Wyświetla aktywatory programów w zorganizowanym menu"
+msgstr "Menu aplikacji z wyszukiwaniem"
 
 #. End of file
 #. ----------------------------------------------------------------------------
